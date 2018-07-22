@@ -1,0 +1,29 @@
+
+.jumbotron-style {
+    color: white;
+    background-image: url(../images/train.jpg);
+    background-size: 100%;
+    background-position: center;
+    height: 500px;
+}
+
+.card-header-style {
+    color: white;
+    background-image: url(../images/train.jpg);
+}
+
+.background-style {
+    background-image: url(../images/qbkls.png);
+}
+
+.card-body-style {
+    background-color: rgb(234, 241, 255);
+}
+
+
+
+
+
+
+
+
