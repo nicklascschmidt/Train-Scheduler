@@ -1,3 +1,5 @@
 Train Scheduler Project
 
-Insert instructions here!
+Enter info into the application and see your train displayed in the chart above the form. Easy to use and fully functional, as long as you input the times in the correct format.
+
+Have fun! (?)
