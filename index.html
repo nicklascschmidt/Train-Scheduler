@@ -12,35 +12,234 @@
 
     <div class="container">
 
+        <div class="jumbotron">
+            <div class="container">
+                <h1 class="display-4">The Metro</h1>
+                <p class="lead">Shows all yo' trains</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Current Train Schedule</div>
+            <div class="card-body">
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Train Name</th>
+                            <th scope="col">Destination</th>
+                            <th scope="col">Frequency (min)</th>
+                            <th scope="col">Next Arrival</th>
+                            <th scope="col">Minutes Away</th>
+                        </tr>
+                    </thead>
+                    <tbody id="display-new-row">
+                    </tbody>
+                </table> 
+            </div>
+        </div>
+
+        <br>
+
+        <div class="card">
+            <div class="card-header">Add Train</div>
+            <div class="card-body">
+                <form>
+
+                    <div class="form-group">
+                        <label for="display-train-name">Train Name</label>
+                        <input type="text" class="form-control" id="display-train-name" placeholder="enter a train name...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="display-destination">Destination</label>
+                        <input type="text" class="form-control" id="display-destination" placeholder="enter a destination...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="display-first-train-time">First Train Time</label>
+                        <input type="text" class="form-control" id="display-first-train-time" aria-describedby="helpNote" placeholder="enter first train time...">
+                        <small id="helpNote" class="form-text text-muted">Please enter in military time (HH:mm)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="display-frequency">Frequency (min)</label>
+                        <input type="text" class="form-control" id="display-frequency" placeholder="enter a frequency...">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="add-train-btn">Submit</button>
+                </form>
+
+            </div>
+        </div>
+
 
 
 
 
     </div>
 
+    <!-- JQuery + Moment JS + Local JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://rawgit.com/moment/moment/2.18.0/min/moment.min.js"></script>
+    <script type="text/javascript" src="assets/js/javascript.js"></script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/5.3.0/firebase.js"></script>
+
     <!-- temp JS - to be moved -->
     <script>
-    $(document).ready(function() {
+
+        var timeNow;
+
+        var userTime;
+        var userHour;
+        var userMinute;
+        var trainName;
+        var trainDestination;
+        var trainTime;
+        var trainFrequency;
+
+        function checkTime() {
+            console.log("userTime: " + userTime);
+            console.log("timeNow: " + timeNow);
+
+            // adds to userTime until it's after timeNow
+            while (moment(userTime).isBefore(timeNow)) {
+                userTime = moment(userTime, "YYYY-MM-DD kk:mm").add(trainFrequency,"minutes").format("YYYY-MM-DD kk:mm");
+            }
+            console.log("New userTime: " + userTime);
+        }
 
 
 
 
+        moment(userTime).isBefore(timeNow);
 
-        // Event handler (on click) has to be on body, not on load/doc.ready
-        $('body').on('click','class/ID here',function() {
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyDcs4abKHEG8rzr3vS2UyIrQoiC63dkRRI",
+            authDomain: "train-scheduler-7f2f8.firebaseapp.com",
+            databaseURL: "https://train-scheduler-7f2f8.firebaseio.com",
+            projectId: "train-scheduler-7f2f8",
+            storageBucket: "",
+            messagingSenderId: "502832145957"
+        };
+        firebase.initializeApp(config);
 
 
+        // Code this app to calculate when the next train will arrive; this should be relative to the current time.
+        // Users from many different machines must be able to view same train times.
+        // Styling and theme are completely up to you. Get Creative!
+
+
+
+        var database = firebase.database();
+
+        // 2. Button for adding train lines
+        $("#add-train-btn").on("click", function(event) {
+            event.preventDefault();
+
+            // Grabs user input
+            trainName = $("#display-train-name").val().trim();
+            trainDestination = $("#display-destination").val().trim();
+            trainTime = $("#display-first-train-time").val().trim();
+            trainFrequency = $("#display-frequency").val().trim();
+            
+            
+            
+            // LOGIC
+            timeNow = moment().format("YYYY-MM-DD kk:mm");
+
+
+            userHour = trainTime.substring(0,2);
+            userMinute = trainTime.substring(3,5);
+            userTime = moment().set("hour",userHour).set("minute",userMinute).format("YYYY-MM-DD kk:mm");
+
+
+            checkTime();
+
+            var minutesRemaining = moment.duration(timeNow.diff(userTime));
+
+
+            // Creates local "temporary" object for holding employee data
+            var newTrain = {
+                name: trainName,
+                destination: trainDestination,
+                frequency: trainFrequency,
+                nextArrival: userTime,
+                minutesAway: 
+            };
+
+            // Uploads employee data to the database - using PUSH instead of SET
+            database.ref().push(newTrain);
+
+            // Logs everything to console
+            console.log(newTrain.name);
+            console.log(newTrain.destination);
+            console.log(newTrain.time);
+            console.log(newTrain.frequency);
+
+
+
+
+            alert("Train successfully added");
+
+            // Clears all of the inputs
+            $("#trainName").val("");
+            $("#trainDestination").val("");
+            $("#trainTime").val("");
+            $("#trainFrequency").val("");
+
+            
         });
 
+        // 3. Create Firebase event for adding employee to the database and a row in the html when a user adds an entry
+        database.ref().on("child_added", function(childSnapshot) {
+            console.log(childSnapshot.val());
 
-    });
+            // Store everything into a variable.
+            var trainName = childSnapshot.val().name;
+            var trainDestination = childSnapshot.val().destination;
+            var trainTime = childSnapshot.val().time;
+            var trainFrequency = childSnapshot.val().frequency;
+
+            // Employee Info
+            console.log(trainName);
+            console.log(trainDestination);
+            console.log(trainTime);
+            console.log(trainFrequency);
+
+            // Prettify the employee start
+            //var empStartPretty = moment.unix(empStart).format("MM/DD/YYYY");
+
+            // Calculate the months worked using hardcore math
+            // To calculate the months worked
+            //var empMonths = moment().diff(moment(empStart, "X"), "months");
+            //console.log(empMonths);
+
+            // Calculate the total billed rate
+            //var empBilled = empMonths * empRate;
+            //console.log(empBilled);
+
+            // Create the new row
+            var newRow = $("<tr>").append(
+                $("<td>").text(trainName),
+                $("<td>").text(trainDestination),
+                $("<td>").text(trainFrequency),
+                $("<td>").text(trainTime),
+            );
+
+            // Append the new row to the table
+            $("#display-new-row").append(newRow);
+
+        });
+            
+
+
+
     
     
     </script>
-
-    <!-- JQuery + Local JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script type="text/javascript" src="assets/js/javascript.js"></script>
 
 </body>
 
