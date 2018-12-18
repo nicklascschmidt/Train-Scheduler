@@ -1,7 +1,7 @@
 
 .jumbotron-style {
     color: white;
-    background-image: url(../images/train.jpg);
+    background-image: url('https://i.imgur.com/jhooP32.jpg');
     background-size: 100%;
     background-position: center;
     height: 500px;
@@ -9,7 +9,6 @@
 
 .card-header-style {
     color: white;
-    background-image: url(../images/train.jpg);
 }
 
 .background-style {
